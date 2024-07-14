@@ -146,7 +146,7 @@ class Trainer(object):
         vals = (vals * (self.norm_max_label - self.norm_min_label)) + self.norm_min_label
         return torch.exp(vals)
 
-    def test(self, dataset):
+    def test(self, dataset, itr):
         global estimate_output
         self.model.train()
         # self.model.eval()
@@ -168,7 +168,10 @@ class Trainer(object):
             reliable_label4 = []
             reliable_estimate_output5 = []
             reliable_label5 = []
-            total_final_estimate_variance = []
+            reliable_estimate_output6 = []
+            reliable_label6 = []
+            reliable_estimate_output7 = []
+            reliable_label7 = []
             # print(len(dataset))
             for idx in tqdm(range(0, len(dataset))):
                 feature, adjacency_list, node_order, edge_order, label = dataset[idx]
@@ -218,7 +221,7 @@ class Trainer(object):
 
                 # nnpg 度量的关键
                 # 运行模型多次并收集输出结果
-                num_runs = 3  # 设置运行次数
+                num_runs = itr  # 设置运行次数
                 predictions = []
 
                 for _ in range(num_runs):
@@ -247,69 +250,53 @@ class Trainer(object):
                 #     file.write(line)
 
                 self.node_qerror(mean, data['labels'].detach().numpy(), variance)
-                print(use_time * 1000.0)
+                # print(use_time * 1000.0)
 
-                # # 4
-                # total_final_estimate_output.append(mean[0])
-                # # # total_final_estimate_variance.append(variance[2])
-                # total_final_label.append(data['labels'][0])
-                # if(variance[0] <= 1):
-                #     reliable_estimate_output1.append(mean[0])
-                #     reliable_label1.append(data['labels'][0])
-                # if(variance[0] <= 0.8):
-                #     reliable_estimate_output2.append(mean[0])
-                #     reliable_label2.append(data['labels'][0])
-                # if(variance[0] <= 0.7):
-                #     reliable_estimate_output3.append(mean[0])
-                #     reliable_label3.append(data['labels'][0])
-                # if(variance[0] <= 0.5):
-                #     reliable_estimate_output4.append(mean[0])
-                #     reliable_label4.append(data['labels'][0])
-                # if(variance[0] <= 0.3):
-                #     reliable_estimate_output5.append(mean[0])
-                #     reliable_label5.append(data['labels'][0])
-                # # 2
-                # total_final_estimate_output.append(mean[4])
-                # # total_final_estimate_variance.append(variance[2])
-                # total_final_label.append(data['labels'][4])
-                total_final_estimate_output.append(mean[2])
-                # # total_final_estimate_variance.append(variance[2])
-                total_final_label.append(data['labels'][2])
-                if(variance[2] <= 1):
-                    reliable_estimate_output1.append(mean[2])
-                    reliable_label1.append(data['labels'][2])
-                if(variance[2] <= 0.8):
-                    reliable_estimate_output2.append(mean[2])
-                    reliable_label2.append(data['labels'][2])
-                if(variance[2] <= 0.7):
-                    reliable_estimate_output3.append(mean[2])
-                    reliable_label3.append(data['labels'][2])
-                if(variance[2] <= 0.5):
-                    reliable_estimate_output4.append(mean[2])
-                    reliable_label4.append(data['labels'][2])
-                if(variance[2] <= 0.3):
-                    reliable_estimate_output5.append(mean[2])
-                    reliable_label5.append(data['labels'][2])
-                # print(0)
+                total_final_estimate_output.append(mean[0])
+                total_final_label.append(data['labels'][0])
+                
+                if(variance[0] <= 1):
+                    reliable_estimate_output1.append(mean[0])
+                    reliable_label1.append(data['labels'][0])
+                if(variance[0] <= 0.8):
+                    reliable_estimate_output2.append(mean[0])
+                    reliable_label2.append(data['labels'][0])
+                if(variance[0] <= 0.7):
+                    reliable_estimate_output3.append(mean[0])
+                    reliable_label3.append(data['labels'][0])
+                if(variance[0] <= 0.5):
+                    reliable_estimate_output4.append(mean[0])
+                    reliable_label4.append(data['labels'][0])
+                if(variance[0] <= 0.3):
+                    reliable_estimate_output5.append(mean[0])
+                    reliable_label5.append(data['labels'][0])
+                if(variance[0] <= 0.2):
+                    reliable_estimate_output6.append(mean[0])
+                    reliable_label6.append(data['labels'][0])
+                if(variance[0] <= 0.1):
+                    reliable_estimate_output7.append(mean[0])
+                    reliable_label7.append(data['labels'][0])
                 
 
             # test_loss = final_error/(len(dataset))
             # print("     Testing q-error for final card: {}".format(test_loss))
             print("     Testing take time in total: {} ms".format(use_time * 1000.0))
             print(len(total_final_estimate_output))
-            print(len(reliable_estimate_output1))
-            print(len(reliable_estimate_output2))
-            print(len(reliable_estimate_output3))
-            print(len(reliable_estimate_output4))
-            print(len(reliable_estimate_output5))
             qerror = self.print_qerror(total_final_estimate_output, total_final_label)
+            print(len(reliable_estimate_output1))
             qerror = self.print_qerror(reliable_estimate_output1, reliable_label1)
+            print(len(reliable_estimate_output2))
             qerror = self.print_qerror(reliable_estimate_output2, reliable_label2)
+            print(len(reliable_estimate_output3))            
             qerror = self.print_qerror(reliable_estimate_output3, reliable_label3)
+            print(len(reliable_estimate_output4))
             qerror = self.print_qerror(reliable_estimate_output4, reliable_label4)
+            print(len(reliable_estimate_output5))
             qerror = self.print_qerror(reliable_estimate_output5, reliable_label5)
-
-
+            print(len(reliable_estimate_output6))
+            qerror = self.print_qerror(reliable_estimate_output6, reliable_label6)
+            print(len(reliable_estimate_output7))
+            qerror = self.print_qerror(reliable_estimate_output7, reliable_label7)
             return qerror
     
     
@@ -343,12 +330,12 @@ class Trainer(object):
         print("     75th percentile: {}".format(np.percentile(qerror, 75)))
         print("     90th percentile: {}".format(np.percentile(qerror, 90)))
         print("     99th percentile: {}".format(np.percentile(qerror, 99)))
-        with open("accuracy.txt", "a") as file:
-                # 将准确度写入文件，并添加换行符
-                file.write(str(np.percentile(qerror, 50))+" ")
-                file.write(str(np.percentile(qerror, 75))+" ")
-                file.write(str(np.percentile(qerror, 90))+" ")
-                file.write(str(np.percentile(qerror, 99))+" \n")
+        # with open("accuracy.txt", "a") as file:
+        #         # 将准确度写入文件，并添加换行符
+        #         file.write(str(np.percentile(qerror, 50))+" ")
+        #         file.write(str(np.percentile(qerror, 75))+" ")
+        #         file.write(str(np.percentile(qerror, 90))+" ")
+        #         file.write(str(np.percentile(qerror, 99))+" \n")
         print("     Max: {}".format(np.max(qerror)))
         print("     Mean: {}".format(np.mean(qerror)))
 

@@ -1,1 +1,1 @@
-# STSRUCard
+# SpikingCard

@@ -19,28 +19,28 @@ if __name__ == '__main__':
     embed_dim = 256
     mem_dim = 1024 #
     output_dim = 1024 #
-    batch_size = 50 #
+    batch_size = 100 #
     lr_set = 0.0001 #
     cuda_use = False
     GPU_no = 1
     wd_set = 0.00001
     feature_dim = 70
-    # train_path = './data/train_10K'
+    train_path = './data/train_10K'
     # train_path = './data/train_8K'
     # train_path = './data/train_6K'
     # train_path = './data/train_4K'
-    train_path = './data/train_8_join'
+    # train_path = './data/train_8_join'
     # train_path = './data/train_6_join'
     train_size = 11000
     test_size = 520
 
     # torch.cuda.set_device(GPU_no)
-    # max_label, min_label = utils.get_max_min_label('./data/train_10K')
+    max_label, min_label = utils.get_max_min_label('./data/train_10K')
     # max_label, min_label = utils.get_max_min_label('./data/train_8K')
     # max_label, min_label = utils.get_max_min_label('./data/train_6K')
     # max_label, min_label = utils.get_max_min_label('./data/train_4K')
     # max_label, min_label = utils.get_max_min_label('./data/train_8_join')
-    max_label, min_label = utils.get_max_min_label('./data/train_6_join')
+    # max_label, min_label = utils.get_max_min_label('./data/train_6_join')
     
     print("card domain: ", str(min_label)+ "(" + str(np.log(min_label))+ ")  " + str(max_label) + "(" + str(np.log(max_label)) + ")")
     # prepare training set
@@ -84,19 +84,33 @@ if __name__ == '__main__':
 
     if mode == 'Test_Spiking_T_SRU':
         model = Spiking_T_SRU(cuda_use, feature_dim, embed_dim, mem_dim, output_dim)
-        model.load_state_dict(torch.load('./model/Spiking_T_SRU_4_joins.pth'))
+        model.load_state_dict(torch.load('./model/Spiking_T_SRU_with_Uncertainty.pth'))
         optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr_set, weight_decay=wd_set)
         trainer = Trainer(cuda_use, model, optimizer, min_label, max_label)
-        len = 10
+        len = 5
+        print("itr = 10\n")
         for _ in range(len):
-            qerror = trainer.test(test_dataset)
+            qerror = trainer.test(test_dataset, 10)
+        print("******************************************************\n")
+        print("itr = 7\n")
+        for _ in range(len):
+            qerror = trainer.test(test_dataset, 7)
+        print("******************************************************\n")
+        print("itr = 5\n")
+        for _ in range(len):
+            qerror = trainer.test(test_dataset, 5)
+        print("******************************************************\n")
+        print("itr = 2\n")
+        for _ in range(len):
+            qerror = trainer.test(test_dataset, 2)
+        print("******************************************************\n")
 
     if mode == 'Test_SRU':
         model = SRU(cuda_use, feature_dim, embed_dim, mem_dim, output_dim)
-        model.load_state_dict(torch.load('./model/example.pth'))
+        model.load_state_dict(torch.load('./model/example.pth', map_location=torch.device('cpu')))
         optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr_set, weight_decay=wd_set)
         trainer = Trainer(cuda_use, model, optimizer, min_label, max_label)
-        qerror = trainer.test(test_dataset)
+        qerror = trainer.test(test_dataset, 1)
 
 
 
