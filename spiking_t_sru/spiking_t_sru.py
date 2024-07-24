@@ -60,19 +60,19 @@ class SRU(torch.nn.Module):
         torch.nn.init.xavier_uniform_(self.out_mlp2.weight)
         torch.nn.init.constant_(self.out_mlp2.bias, 0)
 
-        if self.cuda_use:
-            self.feature_mpl_operation.cuda()
-            self.feature_mpl_filter.cuda()
-            self.feature_mpl_table.cuda()
-            self.feature_mpl_join.cuda()
-            self.feature_mpl_operation_2.cuda()
-            self.feature_mpl_table_2.cuda()
-            self.feature_mpl_filter_2.cuda()
-            self.feature_mpl_join_2.cuda()
+        # if self.cuda_use:
+        #     self.feature_mpl_operation.cuda()
+        #     self.feature_mpl_filter.cuda()
+        #     self.feature_mpl_table.cuda()
+        #     self.feature_mpl_join.cuda()
+        #     self.feature_mpl_operation_2.cuda()
+        #     self.feature_mpl_table_2.cuda()
+        #     self.feature_mpl_filter_2.cuda()
+        #     self.feature_mpl_join_2.cuda()
 
-            self.W_xou.cuda()
-            self.out_mlp1.cuda()
-            self.out_mlp2.cuda()
+        #     self.W_xou.cuda()
+        #     self.out_mlp1.cuda()
+        #     self.out_mlp2.cuda()
 
 
 

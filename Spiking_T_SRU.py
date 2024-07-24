@@ -92,18 +92,18 @@ if __name__ == '__main__':
         for _ in range(len):
             qerror = trainer.test(test_dataset, 10)
         print("******************************************************\n")
-        print("itr = 7\n")
-        for _ in range(len):
-            qerror = trainer.test(test_dataset, 7)
-        print("******************************************************\n")
-        print("itr = 5\n")
-        for _ in range(len):
-            qerror = trainer.test(test_dataset, 5)
-        print("******************************************************\n")
-        print("itr = 2\n")
-        for _ in range(len):
-            qerror = trainer.test(test_dataset, 2)
-        print("******************************************************\n")
+        # print("itr = 7\n")
+        # for _ in range(len):
+        #     qerror = trainer.test(test_dataset, 7)
+        # print("******************************************************\n")
+        # print("itr = 5\n")
+        # for _ in range(len):
+        #     qerror = trainer.test(test_dataset, 5)
+        # print("******************************************************\n")
+        # print("itr = 2\n")
+        # for _ in range(len):
+        #     qerror = trainer.test(test_dataset, 2)
+        # print("******************************************************\n")
 
     if mode == 'Test_SRU':
         model = SRU(cuda_use, feature_dim, embed_dim, mem_dim, output_dim)
