@@ -4,9 +4,9 @@ import torch.nn.functional as F
 from spikingjelly.clock_driven import surrogate
 
 
-class Spiking_T_SRU(torch.nn.Module):
+class Faper(torch.nn.Module):
     def __init__(self, cuda_use, feature_dim, embed_dim, mem_dim, outputdim):
-        super(Spiking_T_SRU, self).__init__()
+        super(Faper, self).__init__()
 
         self.use_time = 0.0
         self.cuda_use = cuda_use
@@ -15,16 +15,19 @@ class Spiking_T_SRU(torch.nn.Module):
         self.mem_dim = mem_dim
         self.outputdim = outputdim
 
+        self.position_dim = 5
         self.operat_dim = 4
         self.table_dim = 11
         self.filter_dim = 18
         self.join_dim = 37
 
+        self.feature_mpl_position = torch.nn.Linear(self.position_dim, self.input_dim)
         self.feature_mpl_operation = torch.nn.Linear(self.operat_dim, self.input_dim)
         self.feature_mpl_table = torch.nn.Linear(self.table_dim, self.input_dim)
         self.feature_mpl_filter = torch.nn.Linear(self.filter_dim, self.input_dim)
         self.feature_mpl_join = torch.nn.Linear(self.join_dim , self.input_dim)
 
+        self.feature_mpl_position_2 = torch.nn.Linear(self.input_dim, self.input_dim)
         self.feature_mpl_operation_2 = torch.nn.Linear(self.input_dim, self.input_dim)
         self.feature_mpl_table_2 =  torch.nn.Linear(self.input_dim, self.input_dim)
         self.feature_mpl_filter_2  = torch.nn.Linear(self.input_dim, self.input_dim)
@@ -34,7 +37,7 @@ class Spiking_T_SRU(torch.nn.Module):
         surrogate_function2 = None
         bias = True
 
-        self.linear_ih = nn.Linear(4 * self.input_dim, 3 * self.mem_dim, bias=bias)
+        self.linear_ih = nn.Linear(5 * self.input_dim, 3 * self.mem_dim, bias=bias)
 
         self.surrogate_function1 = surrogate_function1
         self.surrogate_function2 = surrogate_function2
@@ -47,6 +50,8 @@ class Spiking_T_SRU(torch.nn.Module):
 
 
         if self.cuda_use:
+            self.feature_mpl_position.cuda()
+            self.feature_mpl_position_2.cuda()
             self.feature_mpl_operation.cuda()
             self.feature_mpl_filter.cuda()
             self.feature_mpl_table.cuda()
@@ -60,12 +65,27 @@ class Spiking_T_SRU(torch.nn.Module):
             self.out_mlp1.cuda()
             self.out_mlp2.cuda()
 
-    def forward(self, op_feat, tb_feat, ft_feat, join_feat, node_order, adjacency_list, edge_order):
+    def forward(self, op_feat, tb_feat, ft_feat, join_feat, node_order, adjacency_list, edge_order, pos_order):
         batch_size = node_order.shape[0]
         device = next(self.parameters()).device
         h = torch.zeros(batch_size, self.mem_dim, device=device)
         c = torch.zeros(batch_size, self.mem_dim, device=device)
+        po_feat = torch.zeros(batch_size, 5, device=device)
 
+        edge_mask = node_order == 0
+        po_feat[edge_mask, 0] = 0
+        edge_mask = node_order != 0
+        po_feat[edge_mask, 0] = 1
+            
+        for n in range(1, pos_order.max()):
+            edge_mask = pos_order == n
+            po_feat[edge_mask, 1] = (n & 8) >> 3
+            po_feat[edge_mask, 2] = (n & 4) >> 2
+            po_feat[edge_mask, 3] = (n & 2) >> 1
+            po_feat[edge_mask, 4] = (n & 1) >> 0
+
+        po_feat = F.relu(self.feature_mpl_position(po_feat))
+        po_feat = F.relu(self.feature_mpl_position_2(po_feat))
         op_feat = F.relu(self.feature_mpl_operation(op_feat))
         op_feat = F.relu(self.feature_mpl_operation_2(op_feat))
         tb_feat = F.relu(self.feature_mpl_table(tb_feat))
@@ -74,7 +94,7 @@ class Spiking_T_SRU(torch.nn.Module):
         ft_feat = F.relu(self.feature_mpl_filter_2(ft_feat))
         join_feat = F.relu(self.feature_mpl_join(join_feat))
         join_feat = F.relu(self.feature_mpl_join_2(join_feat))
-        x = torch.cat((op_feat, tb_feat, ft_feat, join_feat), 1)
+        x = torch.cat((po_feat, op_feat, tb_feat, ft_feat, join_feat), 1)
 
         xou = self.surrogate_function1(self.linear_ih(x))
         xx, ff, rr = torch.split(xou, xou.size(1) // 3, dim=1)

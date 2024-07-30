@@ -50,6 +50,10 @@ class Trainer(object):
                 adjacency_list = torch.from_numpy(np.array(adjacency_list))
                 node_order = torch.from_numpy(np.array(node_order))
                 edge_order = torch.from_numpy(np.array(edge_order))
+
+                pos_order = node_order+1
+                pos_order[:,1:] = edge_order
+
                 label = torch.from_numpy(np.array(label))
 
                 operation_feat = operation_feat.float()
@@ -59,6 +63,7 @@ class Trainer(object):
                 label = label.float()
                 node_order = torch.squeeze(node_order, 0)
                 edge_order = torch.squeeze(edge_order, 0)
+                pos_order = torch.squeeze(pos_order, 0)
 
                 data ={'operation_feat': operation_feat,
                        'table_feat': table_feat,
@@ -67,6 +72,7 @@ class Trainer(object):
                        'node_order': node_order,
                        'adjacency_list': adjacency_list,
                        'edge_order': edge_order,
+                       'pos_order': pos_order,
                        'labels': label}
                 batch_dic = batch_dic + (data,)
 
@@ -82,7 +88,9 @@ class Trainer(object):
                 dic['adjacency_list'] = dic['adjacency_list'].cuda()
                 dic['edge_order'] = dic['edge_order'].cuda()
                 dic['labels'] = dic['labels'].cuda()
+                dic['pos_order'] = dic['pos_order'].cuda()
 
+            # print(dic)
             estimate_output = self.model(
                 dic['operation_feat'],
                 dic['table_feat'],
@@ -90,7 +98,8 @@ class Trainer(object):
                 dic['join_feat'],
                 dic['node_order'],
                 dic['adjacency_list'],
-                dic['edge_order']
+                dic['edge_order'],
+                dic['pos_order']
             )
             loss = self.loss_function(estimate_output, dic['labels'])
             loss.backward()
@@ -143,6 +152,10 @@ class Trainer(object):
                 adjacency_list = torch.from_numpy(np.array(adjacency_list))
                 node_order = torch.from_numpy(np.array(node_order))
                 edge_order = torch.from_numpy(np.array(edge_order))
+
+                pos_order = node_order+1
+                pos_order[1:] = edge_order
+
                 label = torch.from_numpy(np.array(label))
 
                 operation_feat = operation_feat.float()
@@ -152,6 +165,7 @@ class Trainer(object):
                 label = label.float()
                 node_order = torch.squeeze(node_order, 0)
                 edge_order = torch.squeeze(edge_order, 0)
+                pos_order = torch.squeeze(pos_order, 0)
 
                 data ={'operation_feat': operation_feat,
                     'table_feat': table_feat,
@@ -160,7 +174,8 @@ class Trainer(object):
                     'node_order': node_order,
                     'adjacency_list': adjacency_list,
                     'edge_order': edge_order,
-                    'labels': label}
+                    'labels': label,
+                    'pos_order': pos_order}
 
                 if self.cuda_use:
                     data['operation_feat'] = data['operation_feat'].cuda()
@@ -171,6 +186,7 @@ class Trainer(object):
                     data['adjacency_list'] = data['adjacency_list'].cuda()
                     data['edge_order'] = data['edge_order'].cuda()
                     data['labels'] = data['labels'].cuda()
+                    data['pos_order'] = data['pos_order'].cuda()
 
                 time_start = time.time()
 
@@ -185,7 +201,8 @@ class Trainer(object):
                         data['join_feat'],
                         data['node_order'],
                         data['adjacency_list'],
-                        data['edge_order']
+                        data['edge_order'],
+                        data['pos_order']
                     )
                     
                     predictions.append(self.unnormalize_torch(estimate_output).detach().numpy())

@@ -211,6 +211,7 @@ def batch_tree_input_comp(batch):
     batched_join = torch.cat([b['join_feat'] for b in batch])
     batched_node_order = torch.cat([b['node_order'] for b in batch])
     batched_edge_order = torch.cat([b['edge_order'] for b in batch])
+    batched_pos_order = torch.cat([b['pos_order'] for b in batch])
     batched_labels = torch.cat([b['labels'] for b in batch])
 
     batched_adjacency_list = []
@@ -229,7 +230,8 @@ def batch_tree_input_comp(batch):
         'edge_order': batched_edge_order,
         'adjacency_list': batched_adjacency_list,
         'tree_sizes': tree_sizes,
-        'labels': batched_labels
+        'labels': batched_labels,
+        'pos_order': batched_pos_order
     }
 
 def unbatch_tree_tensor(tensor, tree_sizes):

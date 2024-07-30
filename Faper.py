@@ -12,11 +12,11 @@ if __name__ == '__main__':
 
     epoch_num = 100
     embed_dim = 256
-    mem_dim = 1024 #
+    mem_dim = 1024 + 256 #
     output_dim = 1024 #
     batch_size = 50 #
     lr_set = 0.0001 #
-    cuda_use = True
+    cuda_use = False
     # GPU_no = 0
     wd_set = 0.00001
     feature_dim = 70
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         test_dataset = Dataloader(train_path, vaild_select, True)
 
     if mode == 'Train':
-        model = Spiking_T_SRU(cuda_use, feature_dim, embed_dim, mem_dim, output_dim)
+        model = Faper(cuda_use, feature_dim, embed_dim, mem_dim, output_dim)
         optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr_set, weight_decay=wd_set)
         trainer = Trainer(cuda_use, model, optimizer, min_label, max_label)
         for epoch in range(epoch_num):
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         torch.save(model.state_dict(), './model/Faper'+'.pth')
 
     if mode == 'Test':
-        model = Spiking_T_SRU(cuda_use, feature_dim, embed_dim, mem_dim, output_dim)
+        model = Faper(cuda_use, feature_dim, embed_dim, mem_dim, output_dim)
         model.load_state_dict(torch.load('./model/example.pth'))
         optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=lr_set, weight_decay=wd_set)
         trainer = Trainer(cuda_use, model, optimizer, min_label, max_label)
