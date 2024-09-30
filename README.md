@@ -77,4 +77,7 @@ Modify the path-related information in 'Faper.py' and then train the correspondi
 python Faper.py
 ```
 
+# Acknowledgments
+This work makes use of [End-to-End CardEst Benchmark](https://github.com/Nathaniel-Han/End-to-End-CardEst-Benchmark/tree/master) and [LPCE](https://github.com/Eilowangfang/LPCE). We are grateful for their contribution to the open-source community.
+
 
