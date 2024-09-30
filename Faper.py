@@ -55,5 +55,3 @@ if __name__ == '__main__':
         trainer = Trainer(cuda_use, model, optimizer, min_label, max_label)
         qerror = trainer.test(test_dataset, 10)
         
-
-
