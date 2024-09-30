@@ -20,12 +20,12 @@ if __name__ == '__main__':
     # GPU_no = 0
     wd_set = 0.00001
     feature_dim = 70
-    train_path = './data/IMDB'
+    train_path = './workload/IMDB'
     train_size = 11000
     test_size = 520
 
     # torch.cuda.set_device(GPU_no)
-    max_label, min_label = utils.get_max_min_label('./data/IMDB')
+    max_label, min_label = utils.get_max_min_label('./workload/IMDB')
     
     print("card domain: ", str(min_label)+ "(" + str(np.log(min_label))+ ")  " + str(max_label) + "(" + str(np.log(max_label)) + ")")
     dataset_size = train_size
@@ -45,7 +45,7 @@ if __name__ == '__main__':
             loss = trainer.train(train_dataset, batch_size)
             print("Evaluation:")
             # if epoch%10 == 9:
-            trainer.test(vaild_dataset,10)
+            trainer.test(vaild_dataset, 10)
         torch.save(model.state_dict(), './model/Faper'+'.pth')
 
     if mode == 'Test':

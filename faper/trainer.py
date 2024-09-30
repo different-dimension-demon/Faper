@@ -8,7 +8,7 @@ import torch.optim as optim
 import torch.utils.data as data
 import torch.nn.functional as F
 from torch.autograd import Variable as Var
-from spiking_t_sru.utils import *
+from faper.utils import *
 
 
 class Trainer(object):
@@ -110,8 +110,6 @@ class Trainer(object):
         self.epoch += 1
         epoch_loss = total_loss/(len(dataset)//batch_size)
         print("     Train Epoch {}, loss: {}".format(self.epoch, epoch_loss))
-        with open("output.txt", "a") as file:
-            file.write("{} ".format(epoch_loss))
         self.model.use_time = 0.0
         return epoch_loss
     
@@ -121,11 +119,9 @@ class Trainer(object):
 
         for i in range(len(label)):
             if (predict[i] > label[i]):
-                # qerror.append((predict[i] / label[i])**2)
-                qerror.append(predict[i] / label[i])
+                qerror.append((predict[i] / label[i])**2)
             else:
-                # qerror.append((label[i] / predict[i])**2)
-                qerror.append(label[i] / predict[i])
+                qerror.append((label[i] / predict[i])**2)
 
         return torch.mean(torch.cat(qerror))
 
@@ -242,7 +238,6 @@ class Trainer(object):
                 qerror.append(float(predict[i]) / float(label[i]))
             else:
                 qerror.append(float(label[i]) / float(predict[i]))
-        
 
         print("     =========Q-error Accuracy=========")
         print("     50th percentile: {}".format(np.percentile(qerror, 50)))
@@ -251,15 +246,4 @@ class Trainer(object):
         print("     99th percentile: {}".format(np.percentile(qerror, 99)))
         print("     Max: {}".format(np.max(qerror)))
         print("     Mean: {}".format(np.mean(qerror)))
-
-        with open("output.txt", "a") as file:
-            file.write("{} ".format(np.percentile(qerror, 50)))
-            file.write("{} ".format(np.percentile(qerror, 75)))
-            file.write("{} ".format(np.percentile(qerror, 90)))
-            file.write("{} ".format(np.percentile(qerror, 99)))
-            file.write("{} ".format(np.max(qerror)))
-            file.write("{}\n".format(np.mean(qerror)))
-
-
-
         return qerror
